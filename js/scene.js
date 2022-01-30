@@ -1,40 +1,28 @@
 //graphic
-let camera, scene, renderer, controls, clock, keyboard,
-    geometry, material, sphere,
-    ambientLight, spotlight, lightTarget;
-let mouse = { x: 0, y: 0 };
+let camera, scene, renderer, clock;
 
 //objects
-let gltfLoader, plane, ball, goal, wall, shootBallObj;
-let goalkeeper, goalkeeperBody, goalkeeperHands;
-let planeName = 'plane', goalkeeperName = 'goalkeeper', ballName = 'ball',
-    goalName = 'goal', shootBallName = 'shootBall', wallName = 'wall';
+let gltfLoader, ball, shootBallObj, goalkeeper, goalkeeperBody, goalkeeperHands;
 
 //sounds
-let shootSound, goalSound, audioListener;
+let shootSound;
 
 //moving goalkeeper
-var curve, points, curveGeometry, curveMaterial, curveObject, PosIndex = 0;
+let curve, PosIndex = 0;
 
 //moving ball
 let moveDirection = { left: 0, right: 0, forward: 0, back: 0 };
-const STATE = { DISABLE_DEACTIVATION : 4 };
 const FLAGS = { CF_KINEMATIC_OBJECT: 2 };
-let ammoTmpPos = null, ammoTmpQuat = null;
 
 //physic
 let physicsWorld, tmpTrans, rigidBodies = [ ];
-let gravityConst = -0.5;
 let margin = 0.05;
-let mass = 1;
 
 Ammo().then( init );
 
 function init() {
     tmpTrans = new Ammo.btTransform();
     gltfLoader = new THREE.GLTFLoader();
-    ammoTmpPos = new Ammo.btVector3();
-    ammoTmpQuat = new Ammo.btQuaternion();
 
     setupGraphics();
     setupPhysicsWorld();
@@ -54,7 +42,6 @@ function render() {
     }
 
     updatePhysics( deltaTime );
-    update();
 
     if( shootBallObj!= null && shootBallObj.position.y < -1 ){
         scene.remove( shootBallObj );
@@ -71,14 +58,6 @@ function render() {
     //     moveGoalkeeper(newPos);
     // }
 }
-function update() {
-    controls.update();
-}
-
-function onDocumentMouseMove( event ) {
-    mouse.x =   ( event.clientX / window.innerWidth ) * 2 - 1;
-    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-}
 
 function setupGraphics(){
     clock = new THREE.Clock();
@@ -94,21 +73,14 @@ function setupGraphics(){
     renderer.shadowMapSoft = true;
     document.getElementById( 'navigation' ).appendChild( renderer.domElement );
 
-    audioListener = new THREE.AudioListener();
-    camera.add(audioListener);
-    loadGoalSound();
     loadShootSound();
 
     setupCurveForMoveGoalkeeper();
 
     addLight();
 
-    controls = new THREE.OrbitControls( camera, renderer.domElement );
+    let controls = new THREE.OrbitControls( camera, renderer.domElement );
     controls.enabled = false;
-
-    keyboard = new THREEx.KeyboardState();
-
-    document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 }
 function setupPhysicsWorld(){
     let collisionConfiguration  = new Ammo.btDefaultCollisionConfiguration(),
@@ -118,7 +90,7 @@ function setupPhysicsWorld(){
 
     physicsWorld           = new Ammo.btDiscreteDynamicsWorld( dispatcher, overlappingPairCache,
         solver, collisionConfiguration );
-    physicsWorld.setGravity( new Ammo.btVector3(0, gravityConst, 0) );
+    physicsWorld.setGravity( new Ammo.btVector3(0, -0.5, 0) );
 }
 function updatePhysics( deltaTime ){
     physicsWorld.stepSimulation( deltaTime, 10 );
@@ -135,22 +107,20 @@ function updatePhysics( deltaTime ){
             objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
         }
     }
-
-    //detectCollision();
 }
 
 function addLight() {
-    ambientLight = new THREE.AmbientLight( 0xffffff );
+    let ambientLight = new THREE.AmbientLight( 0xffffff );
     scene.add( ambientLight );
 
-    spotlight = new THREE.SpotLight( 0xffffff );
+    let spotlight = new THREE.SpotLight( 0xffffff );
     spotlight.position.set( 0 , 4 , 5 );
     spotlight.angle = Math.PI/4;
     spotlight.intensity = 1;
     spotlight.castShadow = true;
     scene.add( spotlight );
 
-    lightTarget = new THREE.Object3D();
+    let lightTarget = new THREE.Object3D();
     lightTarget.position.set( 0, 0.1, 2 );
     scene.add( lightTarget );
     spotlight.target = lightTarget;
@@ -165,8 +135,7 @@ function addPlane() {
     } );
     materialPlane.receiveShadow = true;
 
-    plane = new THREE.Mesh( new THREE.BoxGeometry( 20, 30, 0.01 ), materialPlane );
-    plane.name = planeName;
+    let plane = new THREE.Mesh( new THREE.BoxGeometry( 20, 30, 0.01 ), materialPlane );
     plane.position.set( 0, 0, 0 );
     plane.rotation.x -= Math.PI/2;
     plane.castShadow = true;
@@ -192,7 +161,7 @@ function addSphere(){
     let geometrySphere = new THREE.SphereGeometry( 100, 100, 100 );
     let sphereTexture = new new THREE.TextureLoader().load( '../texture/sky.jpg' );
     let materialSphere = new THREE.MeshBasicMaterial( { map: sphereTexture, transparent: true, side: THREE.DoubleSide } );
-    sphere = new THREE.Mesh( geometrySphere, materialSphere );
+    let sphere = new THREE.Mesh( geometrySphere, materialSphere );
     sphere.position.set( 0, 0, 0 );
     scene.add( sphere );
 }
@@ -218,12 +187,11 @@ function addWall(){
         side: THREE.DoubleSide
     } );
     materialPlane.receiveShadow = true;
-    wall = new THREE.Mesh( new THREE.BoxBufferGeometry(), materialPlane );
+    let wall = new THREE.Mesh( new THREE.BoxBufferGeometry(), materialPlane );
     wall.position.set( pos.x, pos.y, pos.z );
     wall.scale.set( scale.x, scale.y, scale.z );
     wall.castShadow = true;
     wall.receiveShadow = true;
-    wall.name = wallName;
 
     scene.add( wall );
 
@@ -253,11 +221,10 @@ function addGoal(){
     let scale = 0.008;
 
     gltfLoader.load( objectPath, function ( gltf ) {
-        goal = gltf.scene;
+        let goal = gltf.scene;
         goal.position.set( pos.x, pos.y, pos.z );
         goal.rotation.y = Math.PI;
         goal.scale.set( scale, scale, scale );
-        goal.name = goalName;
 
         goal.traverse( child => {
             if( child.isMesh ){
@@ -407,12 +374,12 @@ function addBall() {
     let objectPath = '../models/football-ball.gltf';
     let pos = {x: 0, y: 0.1, z:2};
     let scale = 0.15;
+    let mass = 1;
 
     gltfLoader.load(objectPath, function (gltf) {
         ball = gltf.scene;
         ball.position.set(pos.x,pos.y,pos.z);
         ball.scale.set(scale,scale,scale);
-        ball.name = ballName;
 
         ball.traverse(child => {
             if(child.isMesh){
@@ -435,14 +402,13 @@ function addBall() {
         colShape.calculateLocalInertia( mass, localInertia );
         let rbInfo = new Ammo.btRigidBodyConstructionInfo( mass, motionState, colShape, localInertia );
         let body = new Ammo.btRigidBody( rbInfo );
-        //body.setActivationState( STATE.DISABLE_DEACTIVATION );
 
         physicsWorld.addRigidBody( body );
         ball.userData.physicsBody = body;
         rigidBodies.push( ball );
     });
 }
-function shootBall( curveNum ){
+function shootBall( shootNum ){
     scene.remove( ball );
     ball = null;
 
@@ -454,7 +420,7 @@ function shootBall( curveNum ){
     let node6 = new Ammo.btVector3( 1.8, 0., -6 );
 
     if( shootBallObj == null ){
-        switch( curveNum ){
+        switch( shootNum ){
             case 1:
                 createShootBall( node1 );
                 break;
@@ -477,16 +443,18 @@ function shootBall( curveNum ){
     }
 }
 function createShootBall( shootVector ){
+    const STATE = { DISABLE_DEACTIVATION : 4 };
+
     let objectPath = '../models/football-ball.gltf';
     let pos = {x: 0, y: 0, z:2};
     let scale = 0.15;
+    let mass = 1;
 
     if( shootBallObj == null ){
         gltfLoader.load(objectPath, function ( gltf ) {
             shootBallObj = gltf.scene;
             shootBallObj.position.set( pos.x, pos.y, pos.z );
             shootBallObj.scale.set( scale, scale, scale );
-            shootBallObj.name = shootBallName;
 
             shootBallObj.traverse(child => {
                 if(child.isMesh){
@@ -531,7 +499,6 @@ function addGoalkeeper(){
         goalkeeper = gltf.scene;
         goalkeeper.position.set( pos.x, pos.y, pos.z );
         goalkeeper.scale.set( scale, scale, scale );
-        goalkeeper.name = goalkeeperName;
 
         goalkeeper.traverse( child => {
             if( child.isMesh ){
@@ -613,10 +580,10 @@ function setupCurveForMoveGoalkeeper() {
         new THREE.Vector3( -1.5, 0, -3.25 )
     ], true );
 
-    points = curve.getPoints( 50 );
-    curveGeometry = new THREE.BufferGeometry().setFromPoints( points );
-    curveMaterial = new THREE.LineBasicMaterial( { color : 0xff0000 });
-    curveObject = new THREE.Line( curveGeometry, curveMaterial );
+    let points = curve.getPoints( 50 );
+    let curveGeometry = new THREE.BufferGeometry().setFromPoints( points );
+    let curveMaterial = new THREE.LineBasicMaterial( { color : 0xff0000 });
+    let curveObject = new THREE.Line( curveGeometry, curveMaterial );
 }
 function moveGoalkeeper( newPos ) {
     goalkeeper.position.x = newPos.x;
@@ -633,6 +600,8 @@ function moveGoalkeeper( newPos ) {
 }
 
 function loadShootSound(){
+    let audioListener = new THREE.AudioListener();
+    camera.add(audioListener);
     shootSound = new THREE.Audio( audioListener );
 
     const audioLoader = new THREE.AudioLoader();
@@ -640,16 +609,6 @@ function loadShootSound(){
         shootSound.setBuffer( buffer );
         shootSound.setLoop( false );
         shootSound.setVolume( 1 );
-    });
-}
-function loadGoalSound(){
-    goalSound = new THREE.Audio( audioListener );
-
-    const audioLoader = new THREE.AudioLoader();
-    audioLoader.load( '../sounds/goal_crowd.mp3', function( buffer ) {
-        goalSound.setBuffer( buffer );
-        goalSound.setLoop( false );
-        goalSound.setVolume( 1 );
     });
 }
 
