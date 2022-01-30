@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <title>PG1 - Football goalkeeper</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=0.8, maximum-scale=0.8">
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/game_style.css">
+    </head>
+
+    <script src="../js/threejs/build/three.js"></script>
+    <script src="../js/threejs/js/controls/OrbitControls.js"></script>
+    <script src="../js/threejs/threex.keyboardstate.js"></script>
+    <script src="../js/threejs/js/loaders/GLTFLoader.js"></script>
+    <script src="../js/ammo.js"></script>
+
+    <body>
+        <div class="wrapper">
+            <nav class="navigation" id="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <div class="tooltip">
+                            <a href="howtoplay.html">How to play</a>
+                            <div class="tt">
+                                <img src="../pictures/hint2.jpg">
+                                <i></i>
+                                <h1 style="font-family: Tahoma, serif; color: white;
+                                            text-transform: uppercase; text-decoration: none;">
+                                    Num 1-6 - shoot on goal
+                                </h1>
+                                <h1 style="font-family: Tahoma, serif; color: white;
+                                            text-transform: uppercase; text-decoration: none;">
+                                    R - reset ball
+                                </h1>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div id="canvas">
+            <script src="../js/scene.js"></script>
+        </div>
+
+        <footer>
+            <div class="footer">
+                <a class="subject">PG1 2021/22</a>
+                <a class="name">© Samuel Kucko</a>
+            </div>
+        </footer>
+    </body>
+
+</html>

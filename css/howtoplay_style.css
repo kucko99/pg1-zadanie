@@ -1,0 +1,35 @@
+.navigation ul {
+    grid-gap: 20px;
+    padding: 0;
+    list-style: none;
+    display: inline-grid;
+    grid-template-columns: repeat(2, 10fr);
+}
+
+.home-container{
+    display: grid;
+    grid-gap: 10px;
+    grid-template-areas:
+            'main ad';
+}
+.main { grid-area: main; }
+
+img {
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 30px;
+}
+#hintPicture { max-width: 50% }
+
+h1{
+    color: #4CAF50;
+    font-family: verdana, sans-serif;
+    font-size: 300%;
+}
+p{
+    color: black;
+    font-family: Tahoma, sans-serif;
+    font-size: 100%;
+}
